@@ -1,13 +1,35 @@
 #!/usr/bin/python3
 
 import music_curator as mc
+import argparse
+
+
+parser = argparse.ArgumentParser(
+                    prog=__file__,
+                    description='Do some tests with the music_curator',
+                    epilog='Have fun!')
+parser.add_argument('-p', '--playlist')
+parser.add_argument('-m', '--musicbase')
+
+args = parser.parse_args()
+
+if args.playlist:
+    inputplaylist = args.playlist
+else:
+    inputplaylist = 'songlist.txt'
+
+if args.musicbase:
+    musicbase = args.musicbase
+else:
+    musicbase = '/home/nick/share/mp3-coll'
+
+print (f'analyzing playlist "{inputplaylist}" and searching music in "{musicbase}"')
+print ()
 
 # create track list with
 # mpc -h wohnen -f %file% playlist | tail -n +7  | head > songlist.txt
 
-#album = mc.TrackList('songlist.txt', '/home/nicolas/MP3')
-#album = mc.TrackList('songlist.txt', '/srv/music')
-album = mc.TrackList('songlist.txt', '/home/nick/share/mp3-coll')
+album = mc.TrackList(inputplaylist, musicbase)
 
 for track in album.tracks:
     print(f"{track.codec:<5.5} {track.title:<20.20} {track.artist:<20.20} "
