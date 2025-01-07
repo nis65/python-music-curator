@@ -27,11 +27,9 @@ def ci_get_first(searchdict, searchkey, default):
     that matches the searchkey independent of its case, i.e. it. returns
     "The Beatles" when looking up in "ArTiSt: The Beatles" via "ARTIst".
     """
-    all_keys = searchdict.keys()
-    if searchkey.casefold() in [ key.casefold() for key in all_keys ]:
-        for try_key in all_keys:
-            if try_key.casefold() == searchkey.casefold():
-                return searchdict[try_key]
+    for try_key in searchdict.keys():
+        if try_key.casefold() == searchkey.casefold():
+            return searchdict[try_key]
     return default
 
 class Track:
@@ -51,7 +49,10 @@ class Track:
             # meta info
             meta_info = probe.format.parsed_json
             self.codec = meta_info["format_name"]
-            self.size = meta_info["size"]
+            try:
+                self.size = int(meta_info["size"])
+            except SyntaxError:
+                self.size = int(0)
             self.duration_secs = float(meta_info["duration"])
             self.probe_score = meta_info["probe_score"]
             # title, artist, date from tags (if possible)
@@ -107,12 +108,11 @@ class Track:
 class TrackList:
     def __init__(self, listfilename, musicbase):
         self.listsource = listfilename
-        self.totaltime = 0
         self.tracks = []
         with open(listfilename) as filelist:
             lines = filelist.readlines()
             totallines = len(lines)
-            self.track_count = 0
+            track_count = 0
             for line in lines:
                 trackfilename = line.rstrip()
                 # workaround for mpd/mpc bug when a ":" is part of the filename
@@ -120,10 +120,41 @@ class TrackList:
                 track = Track(musicbase, trackfilename)
                 track.detect_meta()
                 self.tracks.append(track)
-                self.track_count = self.track_count + 1
-                self.totaltime = self.totaltime + track.duration_secs
-                print ( f'done: {self.track_count:>6} of {totallines} ({self.track_count * 100 // totallines}%, last title: {track.title:{"_"}<30.30})', end='\r', file=sys.stderr)
+                track_count = track_count + 1
+                print ( f'done: {track_count:>6} of {totallines} ({track_count * 100 // totallines}%, last title: {track.title:{"_"}<30.30})', end='\r', file=sys.stderr)
             print ('\n', file=sys.stderr)
+
+    @property
+    def totaltime(self):
+        sum = 0.0
+        for track in self.tracks:
+            sum = sum + track.duration_secs
+        return sum
+
+    @property
+    def has_zero_time_tracks(self):
+        for track in self.tracks:
+            if track.duration_secs <= 0:
+                return True
+        return False
+
+    @property
+    def totalsize(self):
+        sum = 0
+        for track in self.tracks:
+            sum = sum + track.size
+        return sum
+
+    @property
+    def has_zero_size_tracks(self):
+        for track in self.tracks:
+            if track.size <= 0:
+                return True
+        return False
+
+    @property
+    def averagetime(self):
+        return self.totaltime / len(self.tracks)
 
 class LocalException(Exception):
     pass
