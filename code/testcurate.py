@@ -30,6 +30,7 @@ print ()
 # mpc -h wohnen -f %file% playlist | tail -n +7  | head > songlist.txt
 
 album = mc.TrackList(inputplaylist, musicbase, 60*30)
+# album = mc.TrackList(inputplaylist, musicbase, max_size=43159994)
 
 for track in album.tracks:
     print(f"{track.codec:<5.5} {track.title:<20.20} {track.artist:<20.20} "

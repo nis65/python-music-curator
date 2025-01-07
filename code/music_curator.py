@@ -106,7 +106,8 @@ class Track:
         return json.dumps(self.metadata.__dict__, indent=2)
 
 class TrackList:
-    def __init__(self, listfilename, musicbase, max_seconds=float(60*60*24*3600)):
+    def __init__(self, listfilename, musicbase,
+                       max_seconds=float(60*60*24*3600), max_size=1024*1024*1024):
         self.listsource = listfilename
         self.max_seconds = max_seconds
         self.tracks = []
@@ -120,11 +121,16 @@ class TrackList:
                 trackfilename = trackfilename.replace(u"\uf022", ":")
                 track = Track(musicbase, trackfilename)
                 track.detect_meta()
-                if self.totaltime + track.duration_secs >= max_seconds:
+                too_many_seconds = self.totaltime + track.duration_secs >= max_seconds
+                too_many_bytes = self.totalsize + track.size >= max_size
+                if too_many_seconds or too_many_bytes:
                     print()
                     print()
-                    print(f'Stopped adding tracks at {track_count} of {totallines}, '
-                          f'new total time {self.totaltime + track.duration_secs} would exceed {max_seconds}')
+                    print(f'Stopped adding tracks at {track_count} of {totallines}, ')
+                    if too_many_seconds:
+                        print(f'new total time {self.totaltime + track.duration_secs} would exceed {max_seconds}')
+                    if too_many_bytes:
+                        print(f'new total size {self.totalsize + track.size} would exceed {max_size}')
                     break
                 self.tracks.append(track)
                 track_count = track_count + 1
