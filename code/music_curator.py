@@ -107,9 +107,10 @@ class Track:
 
 class TrackList:
     def __init__(self, listfilename, musicbase,
-                       max_seconds=float(60*60*24*3600), max_size=1024*1024*1024):
+            max_seconds=float(60*60*24*3600), max_size=1024*1024*1024):
         self.listsource = listfilename
-        self.max_seconds = max_seconds
+        self.max_seconds = float(max_seconds)
+        self.max_size = int(max_size)
         self.tracks = []
         with open(listfilename) as filelist:
             lines = filelist.readlines()
@@ -167,7 +168,17 @@ class TrackList:
 
     @property
     def averagetime(self):
-        return self.totaltime / len(self.tracks)
+        if len(self.tracks) > 0:
+            return self.totaltime / len(self.tracks)
+        else:
+            return 0
+
+    @property
+    def averagesize(self):
+        if len(self.tracks) > 0:
+            return self.totalsize / len(self.tracks)
+        else:
+            return 0
 
 class LocalException(Exception):
     pass
