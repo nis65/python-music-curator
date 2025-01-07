@@ -39,6 +39,14 @@ for track in album.tracks:
           f"{track.fullpath}")
 
 print ()
-print (f'list source {album.listsource} has {album.track_count} tracks')
-print (f'total seconds {album.totaltime}, average song length {album.totaltime // album.track_count}')
-
+print (f'list generated from {album.listsource} has {len(album.tracks)} tracks')
+print (f'total seconds {album.totaltime}, average song length {album.averagetime}')
+print (f'total minimal size {album.totalsize}')
+if album.has_zero_size_tracks:
+    print ('Warning: Some tracks have size 0')
+else:
+    print ('good: All tracks have size > 0')
+if album.has_zero_time_tracks:
+    print ('Warning: Some tracks have no duration')
+else:
+    print ('good: All tracks have a duration > 0')
