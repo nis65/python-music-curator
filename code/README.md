@@ -29,17 +29,37 @@ different mount points.
 # adjust and run testcurate.py
 
 To create a python `TrackList`, you need
-* the path to the songlist (currently hardcoded to `songlist.txt` - yes, proper parameter handling is about to be implemented)
-* the path to the music library that will be prepended to each filename in the songlist.
+* the path to a playlist, e.g. `-p songlist.txt`
+* the path to the music library that will be prepended to each filename in the songlist, e.g. `-m /my/mp3collection`
 
-Check those two values, then run `testcurate.py`:
+Run
+~~~
+./testcurate.py -p songlist.txt -m /home/nick/share/mp3-coll -d 1320 -s 43159994
+~~~
+
+These parameters are optional:
+
+* `-d` is the maximum total duration of all songs allowed the playlist in seconds
+* `-s` is the maximum total size of all files allowed on the playlist in bytes
+
+When one (or both) maxima are reached, the `Tracklist.__init__`
+functions stops adding tracks to the `Tracklist`.
 
 ~~~
+$ ./testcurate.py -p songlist.txt -m /home/nick/share/mp3-coll -d 1320 -s 43159994
+...
+Stopped adding tracks at 3 of 10,
+new total time 1532.315313 would exceed 1320.0
+new total size 43159994 would exceed 43159994
+...
 mp3   Take Five            Brubeck, Dave Quarte   51   326.15      5220480         44100  2 /home/nick/share/mp3-coll/sound/...
 flac  With My Own Two Hand Ben Harper            100   274.69     32383821   2003  44100  2 /home/nick/share/mp3-coll/sound/...
 ...
-list source songlist.txt has 10 tracks
-total seconds 3233.755314, average song length 323.0
+list generated from songlist.txt has 3 tracks
+total seconds 1319.155313 (of 1320.0 allowed) average song length 439.71843766666666
+total size 21111168 (of 43159994 allowed) average song size 7037056.0
+good: All tracks have size > 0
+good: All tracks have a duration > 0
 ~~~
 
 And this is it. For the moment.
