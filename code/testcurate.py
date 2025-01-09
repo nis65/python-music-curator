@@ -42,27 +42,11 @@ print ()
 # create track list with
 # mpc -h wohnen -f %file% playlist | tail -n +7  | head > songlist.txt
 
-# album = mc.TrackList(inputplaylist, musicbase, 60*30)
-# album = mc.TrackList(inputplaylist, musicbase, max_size=43159994)
 album = mc.TrackList(inputplaylist, musicbase, max_seconds=maxduration, max_size=maxsize)
 
-for track in album.tracks:
-    print(f"{track.codec:<5.5} {track.title:<20.20} {track.artist:<20.20} "
-          f"{track.probe_score:>4} "
-          f"{track.duration_secs:>8.2f} {track.size:>12} {track.date:>6} "
-          f"{track.sample_rate:>6} {track.channels:>2} "
-          f"{track.fullpath}")
-
-print ()
-print (f'list generated from {album.listsource} has {len(album.tracks)} tracks')
-print (f'total seconds {album.totaltime} (of {album.max_seconds} allowed) average song length {album.averagetime}')
-print (f'total size {album.totalsize} (of {album.max_size} allowed) average song size {album.averagesize}')
-print (f'total minimal size on disk {album.totalsize}')
-if album.has_zero_size_tracks:
-    print ('Warning: Some tracks have size 0')
-else:
-    print ('good: All tracks have size > 0')
-if album.has_zero_time_tracks:
-    print ('Warning: Some tracks have no duration')
-else:
-    print ('good: All tracks have a duration > 0')
+print (album)
+print ('-----')
+print (repr(album))
+print ('-----')
+print (album.pp())
+print ('-----')

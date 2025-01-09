@@ -38,6 +38,19 @@ class Track:
         with open(self.fullpath) as tempFile:
             pass
 
+    def __str__(self):
+        return f"title: {getattr(self, 'title', '-' )} artist: {getattr(self, 'artist', '-' )} fullpath: {self.fullpath}"
+
+    def __repr__(self):
+        return json.dumps(self, default=lambda x: x.__dict__)
+
+    def pp(self):
+        return f"""{self.codec:<5.5} {self.title:<20.20} {self.artist:<20.20} \
+{self.probe_score:>4} \
+{self.duration_secs:>8.2f} {self.size:>12} {self.date:>6} \
+{self.sample_rate:>6} {self.channels:>2} \
+{self.fullpath}"""
+
     def detect_meta(self):
         probe = ffprobe3.probe(self.fullpath)
         if len(probe.audio) == 1:
@@ -102,13 +115,11 @@ class Track:
         else:
             raise LocalException(f'Not exactly 1 audio stream ({meta_info["nb_streams"]}) in {self.fullpath}');
 
-    def pp_metadata(self):
-        return json.dumps(self.metadata.__dict__, indent=2)
-
 class TrackList:
     def __init__(self, listfilename, musicbase,
             max_seconds=float(60*60*24*3600), max_size=1024*1024*1024):
         self.listsource = listfilename
+        self.musicbase = musicbase
         self.max_seconds = float(max_seconds)
         self.max_size = int(max_size)
         self.tracks = []
@@ -179,6 +190,21 @@ class TrackList:
             return self.totalsize / len(self.tracks)
         else:
             return 0
+
+    def __repr__(self):
+        return json.dumps(self, default=lambda x: x.__dict__)
+
+    def __str__(self):
+        return f"{self.listsource}: {len(self.tracks)} tracks, total time: {self.totaltime}, total bytes {self.totalsize}"
+
+    def pp(self):
+        output = f"{len(self.tracks)} tracks from {self.listsource} with base {self.musicbase}\n"
+        output = output + f"  max  time/size: {self.max_seconds}/{self.max_size}\n"
+        output = output + f"  zero time/size: {self.has_zero_time_tracks}/{self.has_zero_size_tracks}\n"
+        for track in self.tracks:
+            output = output + f"    {track.pp()} \n"
+        output = output + f"\n  tot time/size: {self.totaltime}/{self.totalsize}\n"
+        return output
 
 class LocalException(Exception):
     pass
