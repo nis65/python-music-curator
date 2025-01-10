@@ -125,6 +125,8 @@ class TrackList:
         self.tracks = []
         with open(listfilename) as filelist:
             lines = filelist.readlines()
+            # remove all comment lines
+            lines = [ line for line in lines if not line.startswith('#') ]
             totallines = len(lines)
             track_count = 0
             for line in lines:
