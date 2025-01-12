@@ -28,7 +28,7 @@ else:
 if args.size:
     maxsize = int(args.size)
 else:
-    maxsize = 512 * 1024 * 1024 * 1024
+    maxsize = 500 * 1000 * 1000 * 1000
 
 if args.duration:
     maxduration = float(args.duration)
@@ -36,17 +36,14 @@ else:
     maxduration = float(60 * 60 * 24 * 365 * 10)
 
 print (f'analyzing playlist "{inputplaylist}" and searching music in "{musicbase}"')
-print (f'maxsize "{maxsize}" maxduration "{maxduration}"')
-print ()
 
-# create track list with
+# create track from mpd list with
 # mpc -h wohnen -f %file% playlist | tail -n +7  | head > songlist.txt
 
 album = mc.TrackList(inputplaylist, musicbase, max_seconds=maxduration, max_size=maxsize)
 
-print (album)
 print ('-----')
-print (repr(album))
+print (album)
 print ('-----')
 print (album.pp())
 print ('-----')

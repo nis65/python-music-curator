@@ -19,6 +19,7 @@ import json
 import re
 import sys
 from dateutil.parser import parse, ParserError
+from datetime import timedelta
 
 @staticmethod
 def ci_get_first(searchdict, searchkey, default):
@@ -31,6 +32,28 @@ def ci_get_first(searchdict, searchkey, default):
         if try_key.casefold() == searchkey.casefold():
             return searchdict[try_key]
     return default
+
+@staticmethod
+def pp_bytes(bytes):
+    divisor=1000
+    unitstrings = [ "B ", "KB" , "MB", "GB", "TB", "PB", "EB" ]
+    unit = 0
+    while bytes >= divisor and unit + 1 < len (unitstrings) :
+        bytes, rest = divmod ( bytes, divisor)
+        unit = unit + 1
+    if unit == 0:
+        return f"{int(bytes):>7} {unitstrings[0]}"
+    else:
+        return f"{int(bytes):>3}.{int(rest):{0}>3} {unitstrings[unit]}"
+
+@staticmethod
+def pp_seconds(seconds):
+    isec, fsec = divmod(round(seconds*100), 100)
+    try:
+        result = f"{timedelta(seconds=isec)}.{fsec:02.0f}"
+    except OverflowError:
+        result = f"{seconds}s"
+    return result
 
 class Track:
     def __init__(self, prefix, path):
@@ -47,7 +70,7 @@ class Track:
     def pp(self):
         return f"""{self.codec:<5.5} {self.title:<20.20} {self.artist:<20.20} \
 {self.probe_score:>4} \
-{self.duration_secs:>8.2f} {self.size:>12} {self.date:>6} \
+{pp_seconds(self.duration_secs):>20.20} {pp_bytes(self.size):>10} {self.date:>6} \
 {self.sample_rate:>6} {self.channels:>2} \
 {self.fullpath}"""
 
@@ -142,9 +165,9 @@ class TrackList:
                     print()
                     print(f'Stopped adding tracks at {track_count} of {totallines}, ')
                     if too_many_seconds:
-                        print(f'new total time {self.totaltime + track.duration_secs} would exceed {max_seconds}')
+                        print(f'new total time {pp_seconds(self.totaltime + track.duration_secs)} would exceed {pp_seconds(max_seconds)}')
                     if too_many_bytes:
-                        print(f'new total size {self.totalsize + track.size} would exceed {max_size}')
+                        print(f'new total size {pp_bytes(self.totalsize + track.size)} would exceed {pp_bytes(max_size)}')
                     break
                 self.tracks.append(track)
                 track_count = track_count + 1
@@ -197,15 +220,15 @@ class TrackList:
         return json.dumps(self, default=lambda x: x.__dict__)
 
     def __str__(self):
-        return f"{self.listsource}: {len(self.tracks)} tracks, total time: {self.totaltime}, total bytes {self.totalsize}"
+        return f"{self.listsource}: {len(self.tracks)} tracks, total time: {pp_seconds(self.totaltime)}, total bytes {pp_bytes(self.totalsize)}"
 
     def pp(self):
         output = f"{len(self.tracks)} tracks from {self.listsource} with base {self.musicbase}\n"
-        output = output + f"  max  time/size: {self.max_seconds}/{self.max_size}\n"
+        output = output + f"  max  time/size: {pp_seconds(self.max_seconds)}/{pp_bytes(self.max_size)}\n"
         output = output + f"  zero time/size: {self.has_zero_time_tracks}/{self.has_zero_size_tracks}\n"
         for track in self.tracks:
             output = output + f"    {track.pp()} \n"
-        output = output + f"\n  tot time/size: {self.totaltime}/{self.totalsize}\n"
+        output = output + f"\n  tot time/size: {pp_seconds(self.totaltime)}/{pp_bytes(self.totalsize)}\n"
         return output
 
 class LocalException(Exception):
