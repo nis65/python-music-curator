@@ -168,9 +168,9 @@ class TrackList:
                     print()
                     print(f'Stopped adding tracks at {track_count} of {totallines}, ')
                     if too_many_seconds:
-                        print(f'new total time {pp_seconds(self.totaltime + track.duration_secs)} would exceed {pp_seconds(max_seconds)}')
+                        print(f'new total time {pp_seconds(self.totaltime + track.duration_secs)} would exceed {pp_seconds(self.max_seconds)}')
                     if too_many_bytes:
-                        print(f'new total size {pp_bytes(self.totalsize + track.size)} would exceed {pp_bytes(max_size)}')
+                        print(f'new total size {pp_bytes(self.totalsize + track.size)} would exceed {pp_bytes(self.max_size)}')
                     break
                 self.tracks.append(track)
                 track_count = track_count + 1
