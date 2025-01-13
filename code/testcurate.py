@@ -40,10 +40,29 @@ print (f'analyzing playlist "{inputplaylist}" and searching music in "{musicbase
 # create track from mpd list with
 # mpc -h wohnen -f %file% playlist | tail -n +7  | head > songlist.txt
 
-album = mc.TrackList(inputplaylist, musicbase, max_seconds=maxduration, max_size=maxsize)
+# with old __init__
+# album = mc.TrackList(inputplaylist, musicbase, max_seconds=maxduration, max_size=maxsize)
+
+album = mc.TrackList(max_seconds=maxduration, max_size=maxsize)
+album.detect_from_playlistfile(inputplaylist, musicbase)
 
 print ('-----')
 print (album)
 print ('-----')
-print (album.pp())
-print ('-----')
+print (album.pp(with_tracks=False))
+print ('=====')
+
+shortalbum = mc.TrackList()
+print (shortalbum)
+print (shortalbum.pp())
+
+shortalbum.tracks = [ track for track in album.tracks if track.duration_secs < 60*3 ]
+shortalbum.musicbase = album.musicbase
+print (shortalbum)
+print (shortalbum.pp())
+
+print ('=====')
+
+bigalbum = album
+bigalbum.tracks = [ track for track in album.tracks if track.size > 40*1000*1000 ]
+print(bigalbum.pp())

@@ -139,13 +139,16 @@ class Track:
             raise LocalException(f'Not exactly 1 audio stream ({meta_info["nb_streams"]}) in {self.fullpath}');
 
 class TrackList:
-    def __init__(self, listfilename, musicbase,
-            max_seconds=float(60*60*24*3600), max_size=1024*1024*1024):
-        self.listsource = listfilename
-        self.musicbase = musicbase
+    def __init__(self, max_seconds=float(60*60*24*3600), max_size=512*1024*1024*1024):
+        self.listsource = 'n/a'
+        self.musicbase = 'n/a'
         self.max_seconds = float(max_seconds)
         self.max_size = int(max_size)
         self.tracks = []
+
+    def detect_from_playlistfile(self, listfilename, musicbase):
+        self.listsource = listfilename
+        self.musicbase = musicbase
         with open(listfilename) as filelist:
             lines = filelist.readlines()
             # remove all comment lines
@@ -158,8 +161,8 @@ class TrackList:
                 trackfilename = trackfilename.replace(u"\uf022", ":")
                 track = Track(musicbase, trackfilename)
                 track.detect_meta()
-                too_many_seconds = self.totaltime + track.duration_secs >= max_seconds
-                too_many_bytes = self.totalsize + track.size >= max_size
+                too_many_seconds = self.totaltime + track.duration_secs >= self.max_seconds
+                too_many_bytes = self.totalsize + track.size >= self.max_size
                 if too_many_seconds or too_many_bytes:
                     print()
                     print()
@@ -222,13 +225,18 @@ class TrackList:
     def __str__(self):
         return f"{self.listsource}: {len(self.tracks)} tracks, total time: {pp_seconds(self.totaltime)}, total bytes {pp_bytes(self.totalsize)}"
 
-    def pp(self):
+    def pp(self, with_tracks=True):
         output = f"{len(self.tracks)} tracks from {self.listsource} with base {self.musicbase}\n"
         output = output + f"  max  time/size: {pp_seconds(self.max_seconds)}/{pp_bytes(self.max_size)}\n"
         output = output + f"  zero time/size: {self.has_zero_time_tracks}/{self.has_zero_size_tracks}\n"
-        for track in self.tracks:
-            output = output + f"    {track.pp()} \n"
-        output = output + f"\n  tot time/size: {pp_seconds(self.totaltime)}/{pp_bytes(self.totalsize)}\n"
+        if with_tracks:
+            for track in self.tracks:
+                output = output + f"    {track.pp()}\n"
+            output = output + f"\n"
+        else:
+                output = output + f"    tracks hidden\n"
+        output = output + f"  tot time/size: {pp_seconds(self.totaltime)}/{pp_bytes(self.totalsize)}\n"
+        output = output + f"  avg time/size: {pp_seconds(self.averagetime)}/{pp_bytes(self.averagesize)}\n"
         return output
 
 class LocalException(Exception):
