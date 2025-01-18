@@ -3,7 +3,6 @@
 import music_curator as mc
 import argparse
 
-
 parser = argparse.ArgumentParser(
     prog=__file__,
     description="Do some tests with the music_curator",
@@ -36,13 +35,16 @@ if args.duration:
 else:
     maxduration = float(60 * 60 * 24 * 365 * 10)
 
-print(f'analyzing playlist "{inputplaylist}" and searching music in "{musicbase}"')
+print(
+    f'analyzing playlist "{inputplaylist}" and searching music in "{musicbase}"'
+)
 
 # create track from mpd list with
 # mpc -h wohnen -f %file% playlist | tail -n +7  | head > songlist.txt
 
 # with old __init__
-# album = mc.TrackList(inputplaylist, musicbase, max_seconds=maxduration, max_size=maxsize)
+# album = mc.TrackList(inputplaylist, musicbase,
+#                      max_seconds=maxduration, max_size=maxsize)
 
 album = mc.TrackList(max_seconds=maxduration, max_size=maxsize)
 album.detect_from_playlistfile(inputplaylist, musicbase)
@@ -57,7 +59,9 @@ shortalbum = mc.TrackList()
 print(shortalbum)
 print(shortalbum.pp())
 
-shortalbum.tracks = [track for track in album.tracks if track.duration_secs < 60 * 3]
+shortalbum.tracks = [
+    track for track in album.tracks if track.duration_secs < 60 * 3
+]
 shortalbum.musicbase = album.musicbase
 print(shortalbum)
 print(shortalbum.pp())
@@ -65,5 +69,7 @@ print(shortalbum.pp())
 print("=====")
 
 bigalbum = album
-bigalbum.tracks = [track for track in album.tracks if track.size > 40 * 1000 * 1000]
+bigalbum.tracks = [
+    track for track in album.tracks if track.size > 40 * 1000 * 1000
+]
 print(bigalbum.pp())

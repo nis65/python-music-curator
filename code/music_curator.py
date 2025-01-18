@@ -9,8 +9,8 @@ Track.detect_meta():
 
 TrackList:
 
-  A list of Tracks, identified by self.listsource. Some metadata (like total length) is kept.
-  Currently, all tracks undergo .detect_meta() when creating a TrackList. Might change.
+  A list of Tracks, when identified by self.listsource, all tracks can be
+  probed by calling detect_from_playlistfile.
 
 """
 
@@ -107,14 +107,18 @@ class Track:
                 tag_date = ""
             # compute title, artist from filename (maybe needed as last resort)
             # get filename without extension, replace '_' by ' '
-            file_artist_title = re.sub(r"^.*/([^/]+)\.[^./]+$", r"\1", self.fullpath)
+            file_artist_title = re.sub(
+                r"^.*/([^/]+)\.[^./]+$", r"\1", self.fullpath
+            )
             file_artist_title = file_artist_title.replace("_", " ")
             # assume that '-' is used to separate the artist
             # (coming first) from the title (coming last) in the
             # filename. If there are multiple '-', take the last
             # to be the separator
             if "-" in file_artist_title:
-                file_artist, separator, file_title = file_artist_title.rpartition("-")
+                file_artist, separator, file_title = (
+                    file_artist_title.rpartition("-")
+                )
             else:
                 file_title = file_artist_title
                 file_artist = "na"
@@ -141,13 +145,16 @@ class Track:
                 self.date = ""
         else:
             raise LocalException(
-                f"Not exactly 1 audio stream ({meta_info['nb_streams']}) in {self.fullpath}"
+                f"Not exactly 1 audio stream ({meta_info['nb_streams']})"
+                f"in {self.fullpath}"
             )
 
 
 class TrackList:
     def __init__(
-        self, max_seconds=float(60 * 60 * 24 * 3600), max_size=512 * 1024 * 1024 * 1024
+        self,
+        max_seconds=float(60 * 60 * 24 * 3600),
+        max_size=512 * 1024 * 1024 * 1024,
     ):
         self.listsource = "n/a"
         self.musicbase = "n/a"
@@ -178,20 +185,29 @@ class TrackList:
                 if too_many_seconds or too_many_bytes:
                     print()
                     print()
-                    print(f"Stopped adding tracks at {track_count} of {totallines}, ")
+                    print(
+                        f"Stopped adding tracks at {track_count} "
+                        f"of {totallines},"
+                    )
                     if too_many_seconds:
                         print(
-                            f"new total time {pp_seconds(self.totaltime + track.duration_secs)} would exceed {pp_seconds(self.max_seconds)}"
+                            "new total time "
+                            f"{pp_seconds(self.totaltime + track.duration_secs)} "
+                            f"would exceed {pp_seconds(self.max_seconds)}"
                         )
                     if too_many_bytes:
                         print(
-                            f"new total size {pp_bytes(self.totalsize + track.size)} would exceed {pp_bytes(self.max_size)}"
+                            "new total size "
+                            f"{pp_bytes(self.totalsize + track.size)} "
+                            f"would exceed {pp_bytes(self.max_size)}"
                         )
                     break
                 self.tracks.append(track)
                 track_count = track_count + 1
                 print(
-                    f"done: {track_count:>6} of {totallines} ({track_count * 100 // totallines}%, last title: {track.title:{'_'}<30.30})",
+                    f"done: {track_count:>6} of {totallines} "
+                    f"({track_count * 100 // totallines}%, "
+                    f"last title: {track.title:{'_'}<30.30})",
                     end="\r",
                     file=sys.stderr,
                 )
@@ -243,17 +259,20 @@ class TrackList:
         return json.dumps(self, default=lambda x: x.__dict__)
 
     def __str__(self):
-        return f"{self.listsource}: {len(self.tracks)} tracks, total time: {pp_seconds(self.totaltime)}, total bytes {pp_bytes(self.totalsize)}"
+        return (
+            f"{self.listsource}: {len(self.tracks)} tracks, "
+            f"total time: {pp_seconds(self.totaltime)}, "
+            f"total bytes {pp_bytes(self.totalsize)}"
+        )
 
     def pp(self, with_tracks=True):
-        output = f"{len(self.tracks)} tracks from {self.listsource} with base {self.musicbase}\n"
         output = (
-            output
-            + f"  max  time/size: {pp_seconds(self.max_seconds)}/{pp_bytes(self.max_size)}\n"
-        )
-        output = (
-            output
-            + f"  zero time/size: {self.has_zero_time_tracks}/{self.has_zero_size_tracks}\n"
+            f"{len(self.tracks)} tracks from {self.listsource}"
+            f"with base {self.musicbase}\n"
+            "  max  time/size: "
+            f"{pp_seconds(self.max_seconds)}/{pp_bytes(self.max_size)}\n"
+            "  zero time/size: "
+            f"{self.has_zero_time_tracks}/{self.has_zero_size_tracks}\n"
         )
         if with_tracks:
             for track in self.tracks:
@@ -262,12 +281,14 @@ class TrackList:
         else:
             output = output + "    tracks hidden\n"
         output = (
-            output
-            + f"  tot time/size: {pp_seconds(self.totaltime)}/{pp_bytes(self.totalsize)}\n"
+            output + "  tot time/size: "
+            f"{pp_seconds(self.totaltime)}/"
+            f"{pp_bytes(self.totalsize)}\n"
         )
         output = (
-            output
-            + f"  avg time/size: {pp_seconds(self.averagetime)}/{pp_bytes(self.averagesize)}\n"
+            output + "  avg time/size: "
+            f"{pp_seconds(self.averagetime)}/"
+            f"{pp_bytes(self.averagesize)}\n"
         )
         return output
 
