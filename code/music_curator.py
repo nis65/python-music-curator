@@ -60,7 +60,7 @@ def pp_seconds(seconds):
 class Track:
     def __init__(self, fullpath):
         self.fullpath = fullpath
-        with open(self.fullpath) as tempFile:
+        with open(self.fullpath) as tempFile:  # noqa
             pass
 
     def __str__(self):
@@ -70,11 +70,14 @@ class Track:
         return json.dumps(self, default=lambda x: x.__dict__)
 
     def pp(self):
-        return f"""{self.codec:<5.5} {self.title:<20.20} {self.artist:<20.20} \
-{self.probe_score:>4} \
-{pp_seconds(self.duration_secs):>20.20} {pp_bytes(self.size):>10} {self.date:>6} \
-{self.sample_rate:>6} {self.channels:>2} \
-{self.fullpath}"""
+        return (
+            f"{self.codec:<5.5} {self.title:<20.20} {self.artist:<20.20} "
+            f"{self.probe_score:>4} "
+            f"{pp_seconds(self.duration_secs):>20.20} "
+            f"{pp_bytes(self.size):>10} {self.date:>6} "
+            f"{self.sample_rate:>6} {self.channels:>2} "
+            f"{self.fullpath}"
+        )
 
     def detect_meta(self):
         probe = ffprobe3.probe(self.fullpath)
@@ -255,9 +258,9 @@ class TrackList:
         if with_tracks:
             for track in self.tracks:
                 output = output + f"    {track.pp()}\n"
-            output = output + f"\n"
+            output = output + "\n"
         else:
-            output = output + f"    tracks hidden\n"
+            output = output + "    tracks hidden\n"
         output = (
             output
             + f"  tot time/size: {pp_seconds(self.totaltime)}/{pp_bytes(self.totalsize)}\n"
