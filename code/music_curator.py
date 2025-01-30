@@ -267,7 +267,7 @@ class TrackList:
 
     def pp(self, with_tracks=True):
         output = (
-            f"{len(self.tracks)} tracks from {self.listsource}"
+            f"{len(self.tracks)} tracks from {self.listsource} "
             f"with base {self.musicbase}\n"
             "  max  time/size: "
             f"{pp_seconds(self.max_seconds)}/{pp_bytes(self.max_size)}\n"
