@@ -55,6 +55,13 @@ print("-----")
 print(album.pp(with_tracks=False))
 print("=====")
 
+for track in album.tracks:
+    print (f"{mc.pp_seconds(track.duration_secs):>10.10} "
+           f"{track.title:<60.60} "
+           f"{track.artist:<40.40}")
+
+print("=====")
+
 shortalbum = mc.TrackList()
 print(shortalbum)
 print(shortalbum.pp())
